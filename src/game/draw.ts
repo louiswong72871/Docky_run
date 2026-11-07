@@ -9,7 +9,6 @@ import {
   runnerBox,
   type GameState,
   type Obstacle,
-  type ObstacleKind,
 } from "./logic.ts";
 
 const FONT =
@@ -17,9 +16,7 @@ const FONT =
 const OUTLINE = "#24160f";
 const FUR = "#6b4330";
 const FUR_DARK = "#3e2618";
-const CHEST = "#f0c7a2";
 const MUZZLE = "#f6d7bc";
-const NOSE = "#2a1a14";
 const SCARF = "#e0a04a";
 const EYE = "#fffaf3";
 
@@ -45,7 +42,7 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState, view: Re
       ]
     : state.obstacles;
   for (const obs of obstacles) drawObstacle(ctx, obs, view.now);
-  drawGorilla(ctx, state, view, distance);
+  drawGorilla(ctx, state, distance, state.runner.ducking, state.runner.lift);
   if (state.phase === "dead") {
     ctx.fillStyle = "rgba(28, 14, 8, 0.28)";
     ctx.fillRect(0, 0, WORLD_W, WORLD_H);
@@ -54,7 +51,8 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState, view: Re
     ctx.fillStyle = "#24160f";
     ctx.font = `800 16px ${FONT}`;
     ctx.fillText(`分數 ${padScore(state.score)}`, 16, 28);
-    ctx.fillText(`最高 ${padScore(state.best)}`, WORLD_W - 150, 28);
+    const best = `最高 ${padScore(state.best)}`;
+    ctx.fillText(best, WORLD_W - ctx.measureText(best).width - 16, 28);
   }
   if (view.debug && state.phase === "running") {
     const body = runnerBox(state);
@@ -69,7 +67,8 @@ export function render(ctx: CanvasRenderingContext2D, state: GameState, view: Re
 }
 
 function drawObstacle(ctx: CanvasRenderingContext2D, obs: Obstacle, now: number): void {
-  if (isOverhead(obs.kind)) {
+  const overhead = isOverhead(obs.kind);
+  if (overhead) {
     const sway = Math.sin(now / 260 + obs.id) * 4;
     ctx.strokeStyle = "#5a3a24";
     ctx.lineWidth = 8;
@@ -83,29 +82,38 @@ function drawObstacle(ctx: CanvasRenderingContext2D, obs: Obstacle, now: number)
     ctx.fillRect(obs.x + 8, obs.strike - 8, obs.w - 16, 6);
   } else {
     ctx.fillStyle = "#d39245";
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 3;
     ctx.fillRect(obs.x, GROUND_Y - obs.h, obs.w, obs.h);
+    ctx.strokeRect(obs.x, GROUND_Y - obs.h, obs.w, obs.h);
     ctx.fillStyle = "#5c3b28";
     ctx.fillRect(obs.x, GROUND_Y - obs.h * 0.7, obs.w, 5);
   }
   if (obs.label) {
-    const text = isOverhead(obs.kind) ? "蹲" : "跳";
+    const text = overhead ? "蹲" : "跳";
+    const y = overhead ? obs.strike - obs.h - 34 : GROUND_Y - obs.h - 34;
     ctx.fillStyle = "#fff8ec";
-    ctx.fillRect(obs.x + obs.w / 2 - 16, GROUND_Y - obs.h - 34, 32, 24);
-    ctx.fillStyle = "#24160f";
+    ctx.fillRect(obs.x, y, 32, 24);
+    ctx.fillStyle = OUTLINE;
     ctx.font = `800 16px ${FONT}`;
-    ctx.fillText(text, obs.x + obs.w / 2 - 8, GROUND_Y - obs.h - 16);
+    ctx.fillText(text, obs.x + 8, y + 18);
   }
 }
 
-function drawGorilla(ctx: CanvasRenderingContext2D, state: GameState, view: RenderView, distance: number): void {
-  const phase = state.phase === "ready" ? 0.85 : distance * 0.17;
-  const swing = state.runner.lift > 1 ? 1.1 : Math.sin(phase);
+function drawGorilla(
+  ctx: CanvasRenderingContext2D,
+  state: GameState,
+  distance: number,
+  ducking: boolean,
+  lift: number,
+): void {
+  const swing = lift > 1 ? 1.1 : Math.sin(state.phase === "ready" ? 0.85 : distance * 0.17);
   ctx.save();
-  ctx.translate(RUN_X + 46, GROUND_Y - state.runner.lift);
-  if (state.runner.ducking) ctx.scale(1.1, 0.55);
+  ctx.translate(RUN_X + 46, GROUND_Y - lift);
+  if (ducking) ctx.scale(1.1, 0.55);
   ctx.fillStyle = FUR;
   ctx.beginPath();
-  ctx.ellipse(8, -70, 28, 26, swing * 0.05, 0, Math.PI * 2);
+  ctx.ellipse(8, -70, 28, 26, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
   ctx.arc(30, -98, 20, 0, Math.PI * 2);
@@ -128,7 +136,4 @@ function drawGorilla(ctx: CanvasRenderingContext2D, state: GameState, view: Rend
   ctx.fillRect(-8, -46, 14, 46 + swing * 8);
   ctx.fillRect(12, -46, 14, 46 - swing * 8);
   ctx.restore();
-  void CHEST;
-  void NOSE;
-  void view;
 }
