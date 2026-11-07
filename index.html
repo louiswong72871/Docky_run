@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#14241c" />
+    <title>阿剛快跑</title>
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <div>
+          <p class="eyebrow">輕量網頁動畫，不必生成影片</p>
+          <h1>阿剛快跑</h1>
+        </div>
+        <p class="lede">點一下就由左向右跑，畫面自己循環。右邊地上的木桶要跳過，頭上伸過來的藤蔓和蜜蜂要蹲低。</p>
+      </header>
+      <div class="stage">
+        <canvas id="game" width="800" height="360" aria-label="阿剛快跑畫面。自己挑戰時，空白鍵跳躍，向下鍵蹲下。"></canvas>
+      </div>
+      <section class="console" aria-label="操作">
+        <p id="status" class="status" aria-live="polite">按「開始播放」，阿剛會自己跳、自己蹲，一直循環。</p>
+        <div class="rows">
+          <div id="row-start" class="row">
+            <button type="button" id="watch" class="btn btn-watch">開始播放</button>
+            <button type="button" id="play" class="btn btn-play">自己挑戰</button>
+          </div>
+          <div id="row-dead" class="row" hidden>
+            <button type="button" id="rewatch" class="btn btn-watch">再播一次</button>
+            <button type="button" id="retry" class="btn btn-play">再挑戰</button>
+          </div>
+          <div id="row-demo" class="row" hidden>
+            <p class="live">循環播放中</p>
+            <button type="button" id="takeover" class="btn btn-play">改自己玩</button>
+          </div>
+          <div id="row-play" class="row" hidden>
+            <button type="button" id="jump" class="btn btn-jump">跳躍</button>
+            <button type="button" id="duck" class="btn btn-duck">蹲下</button>
+          </div>
+        </div>
+        <div class="meta">
+          <p id="hint" class="hint">空白鍵或「跳躍」跳過木桶。向下鍵或「蹲下」避開上方的東西。</p>
+          <button type="button" id="mute" class="btn btn-ghost" aria-pressed="false">聲音開</button>
+        </div>
+      </section>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
